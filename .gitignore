@@ -1,77 +1,38 @@
-# Ignore list for Eagle, a PCB layout tool
-cat >> .gitignore <<'EOF'
-
-# Environment variables and secrets
-.env
-.env.local
-.env.*.local
-.env.production
-.env.development
-
-# Dependencies
+# dependencies
 node_modules/
 
-# Next.js build output
+# next build output
 .next/
 out/
 
-# Logs
-*.log
+# logs
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
 
-# OS/editor
+# environment files (never commit real secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# keep the safe example file
+!.env.example
+
+# OS / editor
 .DS_Store
-.idea/
 .vscode/
-EOF
-# Backup files
-*.s#?
-*.b#?
-*.l#?
-*.b$?
-*.s$?
-*.l$?
+.idea/
 
-# Eagle project file
-# It contains a serial number and references to the file structure
-# on your computer.
-# comment the following line if you want to have your project file included.
-eagle.epf
+# temp / local artifacts
+tmp/
+*.tmp
+*.temp
 
-# Autorouter files
-*.pro
-*.job
+# coverage
+coverage/
 
-# CAM files
-*.$$$
-*.cmp
-*.ly2
-*.l15
-*.sol
-*.plc
-*.stc
-*.sts
-*.crc
-*.crs
-
-*.dri
-*.drl
-*.gpi
-*.pls
-*.ger
-*.xln
-
-*.drd
-*.drd.*
-
-*.s#*
-*.b#*
-
-*.info
-
-*.eps
-
-# file locks introduced since 7.x
-*.lck
+# TypeScript
+*.tsbuildinfo
