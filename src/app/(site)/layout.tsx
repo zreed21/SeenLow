@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { SeenLowLogo } from "@/components/SeenLowLogo";
 
 /**
- * Public website shell for SeenLow / SeenLow LLC
+ * Public website shell for SeenLow
  * Consistent SeenLow deep black (#0A0A0A) background with crisp #F0E6D8 body text.
  * Max content width ~42rem for clear document layout.
  */
@@ -78,10 +78,10 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       >
         <div style={{ maxWidth: "42rem", margin: "0 auto" }}>
           <p style={{ margin: "0 0 0.35rem 0", color: "#F0E6D8", fontWeight: 600 }}>
-            SeenLow is a US deal-discovery app operated by SeenLow LLC at seenlow.com.
+            SeenLow is a US deal-discovery app operated by Zach Reed doing business as SeenLow at seenlow.com.
           </p>
           <p style={{ margin: 0 }}>
-            Lowest we&apos;ve seen. Checked again before you tap. &middot;{" "}
+            Lowest we've seen. Checked again before you tap. &middot;{" "}
             <a href="mailto:support@seenlow.com" style={{ color: "#B91C1C", textDecoration: "none" }}>
               support@seenlow.com
             </a>
