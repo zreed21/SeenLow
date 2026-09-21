@@ -1,4 +1,4 @@
-# Sale pricing — 50 Daily Fire Deals
+# Sale pricing — SeenLow
 
 ## Current policy
 

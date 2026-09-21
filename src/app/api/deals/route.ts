@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { deals, sources } from "@/db/schema";
-import { seedDatabaseIfEmpty } from "@/db/seed";
 import { catalogPriceFields } from "@/lib/pricing";
 import { refreshCatalogPricing } from "@/lib/catalogPricing";
 import { getSessionUser } from "@/lib/auth";
@@ -15,8 +14,6 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest) {
   try {
-    await seedDatabaseIfEmpty();
-
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "all";

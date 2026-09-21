@@ -18,7 +18,7 @@ export function normalizeDomain(input: string) {
   return url.hostname.toLowerCase().replace(/^www\./, "");
 }
 
-function rootDomain(host: string) {
+export function rootDomain(host: string) {
   // Shared extractor so multi-part suffixes (amazon.co.uk) are keyed correctly.
   return registrableDomain(host);
 }

@@ -1,148 +1,106 @@
 # SeenLow
 
-**SeenLow** is a US deal-discovery app operated by **SeenLow LLC** at **https://seenlow.com**.
+**Lowest we’ve seen. Checked again before you tap.**
 
-**Tagline:** Lowest we’ve seen. Checked again before you tap.
-
-SeenLow watches US store prices and sends you to the best live offer — or buys it for you when you want one seller.
-
----
+SeenLow is a US-only deal-discovery application operated by SeenLow LLC at [seenlow.com](https://seenlow.com). It monitors approved US retailer sources, publishes certified deals, rechecks pricing and availability, supports tracked affiliate redirects, and maintains a separately governed reseller checkout fallback.
 
 ## Brand
 
-- **Brand:** SeenLow
-- **Legal:** SeenLow LLC
-- **Domain:** `seenlow.com`
-- **Support:** `support@seenlow.com`
-- **Partner / sales:** `partners@seenlow.com`
-- **General:** `hello@seenlow.com`
-- **Colors:** Black `#0A0A0A` · Red `#B91C1C`
-- **Bundle ID:** `com.seenlow.app`
+- Brand: **SeenLow**
+- Legal entity: **SeenLow LLC**
+- Website: `https://seenlow.com`
+- Support: `support@seenlow.com`
+- Colors: `#0A0A0A` and `#B91C1C`
+- Bundle ID: `com.seenlow.app`
 
----
+## Stack
 
-## Geo Contract
+- Next.js App Router
+- TypeScript
+- PostgreSQL / Neon
+- Drizzle ORM
+- Stripe PaymentIntents and Checkout Sessions
+- Tailwind CSS
 
-SeenLow is currently **US-only**:
+## Local setup
 
-- US storefronts only (`.com` US chains, not `.co.uk`, `.ca`, `.de`, etc.)
-- USD only
-- Lower-48 US street addresses only
-- No Alaska / Hawaii / PO boxes / Canada / Mexico / worldwide shipping
-- Affiliate links must be **US program trackers**
+1. Install dependencies:
 
----
+   ```bash
+   npm install
+   ```
 
-## Local Setup
+2. Copy the safe environment template:
 
-### 1. Install dependencies
-```bash
-npm install
-```
+   ```bash
+   cp .env.example .env.local
+   ```
 
-### 2. Create your real env file
-Copy the example file:
-```bash
-cp .env.example .env
-```
+3. Add your local PostgreSQL connection to `.env.local`.
 
-Then fill in your actual values in `.env`.
+4. Apply the schema:
 
-### 3. Start locally
-```bash
-npm run dev
-```
+   ```bash
+   npx drizzle-kit push
+   ```
 
----
+5. Start development:
 
-## Verification Commands
+   ```bash
+   npm run dev
+   ```
 
-Run these before deploying:
+## Required validation
+
+Before merging or deploying:
 
 ```bash
 bash scripts/test-payment-source-guard.sh
 npx tsx scripts/test-source-leak.ts
 npx next typegen
-npm exec tsc -- --noEmit
+npm exec tsc -- --noEmit --pretty false
 npm run build
 ```
 
----
+## Production database bootstrap
 
-## Production Bootstrap (Neon / Vercel)
+The production bootstrap is non-destructive:
 
-SeenLow has a safe production bootstrap path:
+- Creates tables only if missing.
+- Inserts the small US-only review catalog only when `deals` is empty.
+- Runs the real source scanner for every source domain.
+- Keeps HTTP 403, timeout, unreadable, or suspicious sources on hold.
+- Never creates affiliate tracking URLs.
+- Preserves existing deals, scans, orders, users, and source records.
 
-- creates missing tables only if absent
-- loads a **small US-only catalog** only when `deals = 0`
-- does **not** run the old destructive demo reseed
-- preserves existing scans, orders, and catalog rows
-
-### Manual bootstrap
-```bash
-DATABASE_URL="postgres://USER:PASSWORD@HOST/DB?sslmode=require" npx tsx scripts/bootstrap-production-neon.ts
-```
-
-### Status endpoint
-- `GET /api/health`
-- `GET /api/system/db-status` (admin only)
-- `POST /api/system/db-status` (admin only)
-
----
-
-## Source Certification
-
-Affiliate CTAs require:
-
-- live HTTPS scan evidence
-- certified source
-- score threshold met
-- US storefront
-- US affiliate tracker
-
-For bot-protected chains (403 / timeout), a real **test buy** may certify the source with:
-
-- `testOrderId`
-- `overrideReason`
-- admin-authenticated approval path
-
-No fake SQL flags should be used in production.
-
----
-
-## Public Compliance Pages
-
-These should be live on the same host used for publisher applications:
-
-- `/disclosure`
-- `/privacy`
-- `/advertise`
-
----
-
-## GitHub Push (Quick)
-
-If you are pushing manually:
+Manual Neon bootstrap:
 
 ```bash
-git init
-git branch -M main
-git add .
-git commit -m "Initial SeenLow app setup"
-git remote add origin https://github.com/YOURNAME/seenlow.git
-git push -u origin main
+DATABASE_URL="postgres://USER:PASSWORD@NEON_HOST/DB?sslmode=require" \
+npx tsx scripts/bootstrap-production-neon.ts
 ```
 
-If using GitHub Desktop:
-1. Add this folder as a local repository
-2. Commit changes to `main`
-3. Publish repository to GitHub
+See [`GO_LIVE.md`](./GO_LIVE.md) for deployment details.
 
----
+## Geo contract
 
-## Important
+- United States catalog only.
+- USD only.
+- Lower-48 street-address reseller shipping only.
+- No Alaska, Hawaii, PO boxes, Canada, Mexico, or international checkout.
+- Affiliate URLs must be genuine US-program HTTPS tracking links.
+- No currency conversion to manufacture a deal.
 
-- `.env` is ignored by `.gitignore`
-- `.env.example` is safe to commit
-- `node_modules/` and `.next/` are ignored
-- **Do not commit real secrets**
+## Important security notes
+
+Never commit:
+
+- `.env`
+- `.env.local`
+- Neon connection strings
+- Stripe secret keys or webhook secrets
+- SMTP passwords
+- OpenAI keys
+- Shared API keys
+
+Commit `.env.example` only. It contains variable names and safe defaults, not credentials.

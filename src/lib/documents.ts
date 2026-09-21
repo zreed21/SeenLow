@@ -14,6 +14,7 @@ export type DocOrder = {
   originalMsrp: string;
   dealPrice: string;
   serviceFee: string;
+  quotedSellPrice?: string | null;
   shippingFee: string;
   taxAmount: string;
   totalAmount: string;
@@ -200,7 +201,7 @@ export async function customerInvoice(order: DocOrder, p: Policy): Promise<strin
   const logo = await logoDataUri();
   const addr = parseAddress(order.shippingAddress);
   const qty = order.quantity ?? 1;
-  const unit = Number(order.dealPrice) + Number(order.serviceFee);
+  const unit = order.quotedSellPrice != null ? Number(order.quotedSellPrice) : Number(order.dealPrice) + Number(order.serviceFee);
   const ship = Number(order.shippingFee || 0);
   const tax = Number(order.taxAmount || 0);
 

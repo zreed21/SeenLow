@@ -80,15 +80,23 @@ export function Sidebar({
       icon: FileText,
       description: "How orders ship and get refunded",
     },
-    {
-      id: "admin",
-      label: "SeenLow Admin Desk",
-      icon: Sliders,
-      badge: userRole === "admin" ? "Admin" : undefined,
-      badgeColor: "bg-red-950/60 text-red-300 border-red-900/60",
-      description: "Listings, orders & email list",
-    },
+    ...(userRole === "admin"
+      ? [
+          {
+            id: "admin",
+            label: "SeenLow Admin Desk",
+            icon: Sliders,
+            badge: "Admin",
+            badgeColor: "bg-red-950/60 text-red-300 border-red-900/60",
+            description: "Listings, orders & email list",
+          },
+        ]
+      : []),
   ];
+
+  const visibleNavItems = navItems.filter(
+    (item) => item.id !== "admin" || userRole === "admin"
+  );
 
   return (
     <aside className="w-full md:w-64 lg:w-72 shrink-0 space-y-4">
@@ -98,7 +106,7 @@ export function Sidebar({
           SeenLow Navigation
         </div>
 
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (

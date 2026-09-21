@@ -1,38 +1,69 @@
-# dependencies
+# SeenLow — Git ignore rules
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+.env.vercel
+!.env.example
+
+# Dependencies
 node_modules/
 
-# next build output
+# Next.js build output
 .next/
 out/
 
-# logs
+# Build and coverage output
+build/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Runtime and debug logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment files (never commit real secrets)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# keep the safe example file
-!.env.example
-
-# OS / editor
-.DS_Store
-.vscode/
-.idea/
-
-# temp / local artifacts
+# Local database / temporary artifacts
+*.sqlite
+*.sqlite3
+*.db
+.tmp/
 tmp/
-*.tmp
-*.temp
 
-# coverage
-coverage/
+# Vercel local project metadata
+.vercel/
 
-# TypeScript
-*.tsbuildinfo
+# Testing artifacts
+playwright-report/
+test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/editor local settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Certificates and private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Archives
+*.zip
+*.tar
+*.tar.gz

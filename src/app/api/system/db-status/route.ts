@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ensureDatabaseReady, getDatabaseStatus } from "@/lib/dbBootstrap";
+import { getDatabaseStatus, ensureDatabaseReady } from "@/lib/dbBootstrap";
 import { getSessionUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 async function requireAdmin() {
   try {
@@ -27,15 +29,16 @@ export async function POST(request: NextRequest) {
   }
   try {
     const result = await ensureDatabaseReady();
+    const status = await getDatabaseStatus();
     return NextResponse.json({
       success: true,
-      message: "Safe database initialization complete. No destructive demo reseed was run.",
-      result,
+      message: "Database schema and catalog checked. Existing rows and scan evidence were preserved.",
+      bootstrapResult: result,
+      currentStatus: status,
     });
   } catch (error: any) {
-    console.error("Error in POST /api/seed:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to initialize database", details: String(error) },
+      { success: false, error: "Database setup failed", details: String(error) },
       { status: 500 }
     );
   }

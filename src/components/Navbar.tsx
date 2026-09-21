@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Clock, ShieldCheck, Bell, ShoppingBag, RefreshCw, ChevronDown, Sun, Moon, LogOut, LogIn, UserPlus } from "lucide-react";
+import { Clock, ShieldCheck, Bell, ShoppingBag, RefreshCw, ChevronDown, Sun, Moon, LogOut, LogIn, UserPlus, Sliders } from "lucide-react";
 import { getTimeUntilMidnight } from "@/lib/utils";
 import { NotificationItem } from "@/types";
 import { SessionUser } from "@/components/AuthModal";
@@ -213,6 +213,17 @@ export function Navbar({
                   <div className="absolute right-0 mt-2 w-60 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-3 text-xs">
                     <p className="font-semibold text-white">{currentUser.name}</p>
                     <p className="text-[11px] text-slate-400 truncate mb-2">{currentUser.email}</p>
+                    {currentUser.role === "admin" && (
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setActiveTab("admin");
+                        }}
+                        className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-slate-800 text-red-300 hover:text-white border-b border-slate-800 mb-1"
+                      >
+                        <Sliders className="w-3.5 h-3.5 text-[#B91C1C]" /> Admin Desk
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setShowUserMenu(false);

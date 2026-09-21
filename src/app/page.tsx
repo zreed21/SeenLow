@@ -80,12 +80,44 @@ export default function Home() {
 
   useEffect(() => {
     setGuestEmail(localStorage.getItem("fd-guest-email") || "");
-    fetch("/api/auth/me").then((r) => r.json()).then((d) => { if (d.success) setCurrentUser(d.user); }).catch(() => {});
+    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const requestedTab = urlParams?.get("tab");
+    const requestedAuth = urlParams?.get("auth");
+
+    if (requestedAuth === "signin" || urlParams?.get("login") === "true") {
+      setAuthModal({ open: true, mode: "login" });
+    }
+
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.user) {
+          setCurrentUser(d.user);
+          if (requestedTab === "admin" && d.user.role === "admin") {
+            setActiveTab("admin");
+          }
+        } else if (requestedTab === "admin") {
+          // Unauthenticated user requesting admin tab -> redirect to sign-in
+          setAuthModal({ open: true, mode: "login" });
+          setActiveTab("top50");
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  // Guard: if unauthenticated or non-admin ever has activeTab="admin", kick back to "top50"
+  useEffect(() => {
+    if (activeTab === "admin" && currentUser?.role !== "admin") {
+      setActiveTab("top50");
+    }
+  }, [activeTab, currentUser]);
 
   const handleSignOut = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setCurrentUser(null);
+    if (activeTab === "admin") {
+      setActiveTab("top50");
+    }
   };
 
   const rememberGuestEmail = (email: string) => {

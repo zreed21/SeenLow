@@ -64,3 +64,29 @@ Submit the live SeenLow URL with these active compliance endpoints:
    - **SPF:** `v=spf1 include:_spf.google.com ~all` (or equivalent).
    - **DKIM:** Generate 2048-bit selector `google._domainkey.seenlow.com`.
    - **DMARC:** `v=DMARC1; p=quarantine; rua=mailto:dmarc@seenlow.com`.
+
+---
+
+## 5. Production Neon Database Bootstrap (Vercel/Neon)
+
+When deploying to Vercel with a Neon database:
+
+1. **Automatic Initialization:**
+   The application automatically checks table existence and database counts on server boot (`instrumentation.ts`) and on incoming `/api/deals` requests:
+   - Queries `information_schema.tables` and executes DDL only if tables are missing.
+   - Checks deals and sources counts.
+   - If deals count is 0, inserts the clean US-only catalog (`SMALL_US_CATALOG`) and calls the real `scanSourcePage` path for every unique product domain.
+   - Scan results determine publication: successful certified sources become sellable; HTTP 403, timeout, unreadable, or suspicious sources remain `hold` with `okToSell=false` until authenticated review/test-buy approval.
+   - It never stamps `httpsValid`, score, allowlist status, or `okToSell` without a real scan.
+   - If deals already exist, preserves all catalog data, scans, and orders without inserting or rescanning.
+
+2. **Manual CLI Bootstrap (Run against Neon connection string):**
+   ```bash
+   DATABASE_URL="postgres://<user>:<password>@<neon-host>/<db>?sslmode=require" npx tsx scripts/bootstrap-production-neon.ts
+   ```
+
+3. **Admin-only Status & Bootstrap Endpoints:**
+   - Authenticated admin `GET https://seenlow.com/api/system/db-status` — Returns database host, table counts, deal counts, and certified sellable SKU count.
+   - Authenticated admin `POST https://seenlow.com/api/system/db-status` — Triggers the safe schema/catalog check.
+   - `/api/seed` is also admin-only and non-destructive. Public `/api/health` returns only `{ "ok": true }`.
+

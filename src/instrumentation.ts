@@ -4,6 +4,23 @@ export async function register() {
   if (g.__seenLowScheduler) return;
   g.__seenLowScheduler = true;
 
+  try {
+    const { ensureDatabaseReady, getDatabaseStatus } = await import("@/lib/dbBootstrap");
+    const status = await getDatabaseStatus();
+    // Bootstrap only for a missing schema or a truly empty catalog. Once Neon
+    // has deal rows, cold starts never run catalog insertion or source scans.
+    if (status.missingTables.length > 0 || status.dealsCount === 0) {
+      await ensureDatabaseReady();
+    } else {
+      console.log(
+        `[db-bootstrap] Existing catalog detected (${status.dealsCount} deals, ` +
+          `${status.sourcesCount} sources). Startup bootstrap skipped.`
+      );
+    }
+  } catch (err) {
+    console.error("[scheduler] Database bootstrap on startup warning:", err);
+  }
+
   const base = process.env.NEXT_PUBLIC_APP_URL || `http://127.0.0.1:${process.env.PORT || 3000}`;
   const ran = new Set<string>();
 
