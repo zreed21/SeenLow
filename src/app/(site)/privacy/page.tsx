@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — SeenLow",
-  description: "Privacy policy for SeenLow, operated by SeenLow LLC at seenlow.com.",
+  description: "Privacy policy for SeenLow at seenlow.com, operated by Zach Reed doing business as SeenLow.",
 };
 
 export default function PrivacyPage() {
@@ -45,23 +45,27 @@ export default function PrivacyPage() {
               margin: 0,
             }}
           >
-            SeenLow is a US deal-discovery app operated by SeenLow LLC at seenlow.com.
+            SeenLow is a US deal-discovery site at seenlow.com, operated by Zach Reed doing business as SeenLow. A limited liability company has not been formed yet. This policy will be updated if that changes.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            <strong style={{ color: "#FFFFFF" }}>What we collect:</strong> Account email and name if you sign up; delivery address and order details if you use our &ldquo;Have us buy it&rdquo; checkout; your email if you join the midnight deal list; and standard technical request logs. Card details go directly to our payment processor (Stripe) and never touch our servers.
+            <strong style={{ color: "#FFFFFF" }}>What we collect:</strong> Account email and name if you sign up; delivery address and order details if you use &ldquo;Have us buy it&rdquo; checkout; your email if you join the midnight deal list; and standard technical request logs. Card details go to the payment processor (Stripe) and are not stored on SeenLow servers.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            <strong style={{ color: "#FFFFFF" }}>Outbound retailer links:</strong> When you tap through to a retailer, we record the deal, timestamp, and price shown so we can verify tracking and fix broken links. Retailers and affiliate networks set their own cookies on their websites under their respective privacy policies.
+            <strong style={{ color: "#FFFFFF" }}>Outbound retailer links:</strong> When you tap through to a retailer, we may record the deal, timestamp, and price shown so we can verify tracking and fix broken links. Retailers and affiliate networks set their own cookies on their sites under their policies.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            <strong style={{ color: "#FFFFFF" }}>What we do not do:</strong> We do not sell personal information. We do not send marketing email without opt-in consent, and every email contains a one-click unsubscribe link.
+            <strong style={{ color: "#FFFFFF" }}>What we do not do:</strong> We do not sell personal information. We do not send marketing email without opt-in consent. List mail includes a one-click unsubscribe link.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            <strong style={{ color: "#FFFFFF" }}>Retention &amp; access:</strong> Order records are kept for accounting and dispute obligations. You can request a copy or deletion of your account data by emailing us.
+            <strong style={{ color: "#FFFFFF" }}>Retention and access:</strong> Order records are kept as needed for accounting, fulfillment, and disputes. Email support@seenlow.com to request a copy or deletion of your account data.
+          </p>
+
+          <p style={{ color: "#F0E6D8", margin: 0 }}>
+            <strong style={{ color: "#FFFFFF" }}>Location:</strong> The site is operated from Williston, North Dakota, United States. The catalog and reseller shipping are US / lower-48 only.
           </p>
 
           <p
@@ -72,7 +76,7 @@ export default function PrivacyPage() {
               borderTop: "1px solid #262626",
             }}
           >
-            <strong style={{ color: "#FFFFFF" }}>Contact:</strong> SeenLow LLC &middot;{" "}
+            <strong style={{ color: "#FFFFFF" }}>Contact:</strong> Zach Reed, d/b/a SeenLow &middot;{" "}
             <a
               href="mailto:support@seenlow.com"
               style={{ color: "#B91C1C", textDecoration: "underline", fontWeight: 600 }}
