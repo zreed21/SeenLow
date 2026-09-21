@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Advertise — SeenLow",
-  description: "Promoted placements on SeenLow, operated by SeenLow LLC at seenlow.com.",
+  description: "Promoted placements on SeenLow, operated by Zach Reed doing business as SeenLow at seenlow.com.",
 };
 
 export default function AdvertisePage() {
@@ -45,11 +45,11 @@ export default function AdvertisePage() {
               margin: 0,
             }}
           >
-            SeenLow is a US deal-discovery app operated by SeenLow LLC at seenlow.com.
+            SeenLow is a US deal-discovery app operated by Zach Reed doing business as SeenLow at seenlow.com.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            Our audience opens the app to see the day&apos;s lowest verified prices across US stores. We sell exactly one ad product, and it is clearly labeled.
+            Our audience opens the app to see the day's lowest verified prices across US stores. We sell exactly one ad product, and it is clearly labeled.
           </p>
 
           <div
@@ -81,7 +81,7 @@ export default function AdvertisePage() {
           </div>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            We keep editorial and paid strictly separate: the SeenLow pick (&ldquo;lowest we&apos;ve tracked in 30 days&rdquo;) is computed from 30-day price history and source certification, and cannot be bought. Shoppers trust the badge because it is never for sale.
+            We keep editorial and paid strictly separate: the SeenLow pick (&ldquo;lowest we've tracked in 30 days&rdquo;) is computed from 30-day price history and source certification, and cannot be bought. Shoppers trust the badge because it is never for sale.
           </p>
 
           <p
