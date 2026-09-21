@@ -212,8 +212,8 @@ export function FaqView() {
         <p className="text-xs text-slate-300">
           Questions about an order? Email <a className="text-red-400 font-bold hover:underline" href={`mailto:${email}`}>{email}</a> (also hello@seenlow.com, partners@seenlow.com).
         </p>
-        <p className="text-[10px] text-slate-500">
-          Operated by SeenLow LLC at seenlow.com. Prices and availability subject to change without notice.
+        <p className="text-[10px] text-slate-500">import { SiteFooter } from "@/components/SiteFooter";
+                <SiteFooter />
         </p>
       </div>
     </div>
