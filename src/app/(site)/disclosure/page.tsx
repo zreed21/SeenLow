@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Disclosure — SeenLow",
-  description: "SeenLow is a US deal-discovery app operated by SeenLow LLC at seenlow.com. Affiliate and merchant disclosure.",
+  description:
+    "SeenLow is a US deal-discovery site operated by Zach Reed, doing business as SeenLow, at seenlow.com. Affiliate and merchant disclosure.",
 };
 
 export default function DisclosurePage() {
@@ -45,23 +46,28 @@ export default function DisclosurePage() {
               margin: 0,
             }}
           >
-            SeenLow is a US deal-discovery app operated by SeenLow LLC at seenlow.com.
+            SeenLow is a US deal-discovery site at seenlow.com, operated by Zach Reed doing business as SeenLow. A limited liability company has not been formed yet. When it is, this page will be updated.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            We may earn a commission if you buy through a retailer link.
+            We may earn a commission if you buy through a retailer link. That is an advertising relationship. It does not change the price the retailer charges you on their site.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            <strong style={{ color: "#FFFFFF" }}>Default path:</strong> you check out at the retailer. Their price, shipping, returns, and label.
+            <strong style={{ color: "#FFFFFF" }}>Default path:</strong> you check out at the retailer. Their price, shipping, returns, and packing label apply.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            <strong style={{ color: "#FFFFFF" }}>Optional path:</strong> &ldquo;Have us buy it&rdquo; &mdash; you pay SeenLow LLC; we are the seller of record. That path is separate.
+            <strong style={{ color: "#FFFFFF" }}>Optional path:</strong> &ldquo;Have us buy it&rdquo; &mdash; you pay SeenLow; Zach Reed doing business as SeenLow is the seller of record for that order. That path is separate from a tap-through to Best Buy or another store.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
-            Sponsored cards are labeled <span style={{ color: "#B91C1C", fontWeight: 700 }}>Sponsored</span>. They are never the SeenLow pick.
+            Sponsored cards are labeled{" "}
+            <span style={{ color: "#B91C1C", fontWeight: 700 }}>Sponsored</span>. They are never the SeenLow pick.
+          </p>
+
+          <p style={{ color: "#F0E6D8", margin: 0 }}>
+            Catalog is United States only, USD only. Reseller shipping is lower-48 street addresses only.
           </p>
 
           <p style={{ color: "#F0E6D8", margin: 0 }}>
@@ -83,6 +89,8 @@ export default function DisclosurePage() {
             >
               support@seenlow.com
             </a>
+            <br />
+            Williston, North Dakota, United States
           </p>
         </div>
       </article>
