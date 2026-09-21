@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="100%" height="100%">
+  <!-- Wordmark for Dark Mode: "Seen" in White -->
+  <style>
+    .text-seen-dark { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-weight: 800; font-size: 88px; letter-spacing: -2px; }
+  </style>
+  
+  <g transform="translate(10, 88)">
+    <text class="text-seen-dark" fill="#FFFFFF">Seen</text>
+    <text class="text-seen-dark" x="212" fill="#B91C1C">L</text>
+    <path fill="#B91C1C" fill-rule="evenodd" d="
+      M 302,-58
+      C 324,-58 340,-42 340,-26
+      C 340,-10 324,4 302,4
+      C 280,4 264,-10 264,-26
+      C 264,-42 280,-58 302,-58
+      Z
+      M 302,-44
+      C 290,-44 280,-36 280,-26
+      C 280,-16 290,-8 302,-8
+      C 314,-8 324,-16 324,-26
+      C 324,-36 314,-44 302,-44
+      Z
+    " />
+    <circle cx="302" cy="-26" r="8" fill="#B91C1C" />
+    <text class="text-seen-dark" x="348" fill="#B91C1C">w</text>
+  </g>
+</svg>

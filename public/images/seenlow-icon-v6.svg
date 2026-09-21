@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Icon Background squircle #0A0A0A -->
+  <rect width="512" height="512" rx="112" fill="#0A0A0A"/>
+  
+  <g fill="#B91C1C">
+    <!-- Top loop of S -->
+    <path d="M 224 144
+             C 178 144 146 178 146 222
+             C 146 238 152 248 160 256
+             L 200 256
+             C 192 248 188 238 188 222
+             C 188 198 204 182 228 182
+             L 290 182
+             C 306 182 316 192 316 206
+             C 316 220 306 230 290 230
+             L 146 230
+             L 146 268
+             L 288 268
+             C 334 268 358 240 358 206
+             C 358 170 330 144 286 144
+             Z" />
+             
+    <!-- Descending L stem & horizontal foot with speech/wedge pointer -->
+    <path d="M 146 230
+             L 228 230
+             L 228 326
+             L 332 326
+             L 332 296
+             L 368 358
+             L 186 358
+             L 186 268
+             L 146 268
+             Z" />
+  </g>
+</svg>

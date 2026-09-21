@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Icon Background #0A0A0A rounded squircle -->
+  <rect width="512" height="512" rx="112" fill="#0A0A0A"/>
+  
+  <!-- Continuous geometric SL Monogram -->
+  <!-- Top loop of S, middle crossbar, vertical descending stem, base leg with sharp terminal beak -->
+  <path fill="#B91C1C" fill-rule="evenodd" d="
+    M 216,144
+    C 176,144 148,172 148,212
+    C 148,236 148,240 148,240
+    L 296,240
+    L 296,280
+    L 232,280
+    L 232,328
+    L 332,328
+    L 332,312
+    L 366,368
+    L 192,368
+    L 192,204
+    C 192,182 204,168 228,168
+    L 300,168
+    C 308,168 316,174 316,184
+    C 316,194 308,200 298,200
+    L 248,200
+    L 248,240
+    L 298,240
+    C 330,240 356,216 356,184
+    C 356,152 330,144 296,144
+    Z
+  "/>
+</svg>

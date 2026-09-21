@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Icon Background squircle #0A0A0A -->
+  <rect width="512" height="512" rx="112" fill="#0A0A0A"/>
+  
+  <g fill="#B91C1C">
+    <!-- Top rounded arch of S -->
+    <path d="M 230 144
+             C 182 144 148 178 148 226
+             C 148 244 154 258 166 268
+             C 178 278 196 282 222 284
+             L 286 284
+             C 298 284 308 274 308 262
+             C 308 250 298 240 286 240
+             L 218 240
+             C 190 240 182 224 182 208
+             C 182 192 194 180 216 180
+             L 302 180
+             L 302 144
+             Z"/>
+
+    <!-- Middle bar extending left to form S crossbar and continuing into the L stem and base foot with terminal downward wedge -->
+    <path d="M 148 236
+             L 232 236
+             L 232 344
+             L 332 344
+             L 332 316
+             L 366 364
+             L 194 364
+             L 194 274
+             L 148 274
+             Z"/>
+  </g>
+</svg>

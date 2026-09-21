@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Rounded app icon background: #0A0A0A -->
+  <rect width="512" height="512" rx="112" fill="#0A0A0A"/>
+  
+  <!-- Interconnected SL Monogram in #B91C1C -->
+  <!-- Upper 'S' loop with smooth spine transitioning directly into the lower 'L' arm with angular terminal quote/arrow tail -->
+  <path d="M 170 170
+           C 170 152 184 138 202 138
+           L 300 138
+           C 324 138 344 158 344 182
+           C 344 206 324 226 300 226
+           L 180 226
+           L 180 348
+           L 320 348
+           L 366 384
+           L 366 302
+           L 242 302
+           L 242 278
+           L 300 278
+           C 352 278 394 236 394 182
+           C 394 130 352 88 300 88
+           L 202 88
+           C 156 88 120 124 120 170
+           L 120 348
+           C 120 376 142 398 170 398
+           L 374 398
+           L 384 398
+           L 384 374
+           L 384 314
+           L 414 338
+           L 384 314
+           Z" fill="#B91C1C"/>
+</svg>
