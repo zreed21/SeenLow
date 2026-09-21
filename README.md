@@ -2,12 +2,12 @@
 
 **Lowest we’ve seen. Checked again before you tap.**
 
-SeenLow is a US-only deal-discovery application operated by SeenLow LLC at [seenlow.com](https://seenlow.com). It monitors approved US retailer sources, publishes certified deals, rechecks pricing and availability, supports tracked affiliate redirects, and maintains a separately governed reseller checkout fallback.
+SeenLow is a US-only deal-discovery application operated by Zach Reed doing business as SeenLow at [seenlow.com](https://seenlow.com). It monitors approved US retailer sources, publishes certified deals, rechecks pricing and availability, supports tracked affiliate redirects, and maintains a separately governed reseller checkout fallback.
 
 ## Brand
 
 - Brand: **SeenLow**
-- Legal entity: **SeenLow LLC**
+- Operator: **Zach Reed d/b/a SeenLow** (no LLC formed yet)
 - Website: `https://seenlow.com`
 - Support: `support@seenlow.com`
 - Colors: `#0A0A0A` and `#B91C1C`

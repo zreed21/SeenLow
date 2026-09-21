@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SeenLow — Lowest we've seen. Checked again before you tap.",
-  description: "SeenLow watches US store prices and sends you to the best live offer — or buys it for you when you want one seller. Operated by SeenLow LLC at seenlow.com.",
+  description: "SeenLow watches US store prices and sends you to the best live offer — or buys it for you when you want one seller. Operated by Zach Reed doing business as SeenLow at seenlow.com.",
   icons: {
     icon: "/images/seenlow-icon.svg",
     apple: "/images/seenlow-icon.svg",
