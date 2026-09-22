@@ -12,10 +12,12 @@ import {
   Sparkles,
   Layers,
   Clock,
-  Eye
+  Eye,
+  Share2
 } from "lucide-react";
 import { Deal } from "@/types";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
+import { shareDeal, openAffiliateOrExternal } from "@/lib/native";
 
 interface DealCardProps {
   deal: Deal;
@@ -58,21 +60,36 @@ export function DealCard({
           )}
         </div>
 
-        {/* Watchlist Quick Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleWatchlist(deal.id);
-          }}
-          className={`absolute top-3 right-3 z-10 p-2 rounded-xl backdrop-blur-md transition ${
-            isWatchlisted
-              ? "bg-rose-500/90 text-white shadow-lg shadow-rose-500/30"
-              : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60"
-          }`}
-          title={isWatchlisted ? "Saved in Watchlist" : "Save to Watchlist"}
-        >
-          <Heart className={`w-4 h-4 ${isWatchlisted ? "fill-white" : ""}`} />
-        </button>
+        {/* Share + Watchlist Quick Buttons */}
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              void shareDeal({ dealId: deal.id, title: deal.title });
+            }}
+            className="p-2 rounded-xl backdrop-blur-md transition bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60"
+            title="Share deal"
+            type="button"
+            aria-label="Share deal"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWatchlist(deal.id);
+            }}
+            className={`p-2 rounded-xl backdrop-blur-md transition ${
+              isWatchlisted
+                ? "bg-rose-500/90 text-white shadow-lg shadow-rose-500/30"
+                : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60"
+            }`}
+            title={isWatchlisted ? "Saved in Watchlist" : "Save to Watchlist"}
+            type="button"
+          >
+            <Heart className={`w-4 h-4 ${isWatchlisted ? "fill-white" : ""}`} />
+          </button>
+        </div>
 
         {/* Product Image */}
         <div
@@ -153,15 +170,20 @@ export function DealCard({
                 <Eye className="w-3.5 h-3.5" />
                 <span>Details & Specs</span>
               </button>
-              <a
-                href={(deal as any).redirectPath || `/api/go/${deal.id}`}
-                target="_blank"
-                rel="noopener noreferrer sponsored"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void openAffiliateOrExternal({
+                    dealId: deal.id,
+                    redirectPath: (deal as any).redirectPath || `/api/go/${deal.id}`,
+                  });
+                }}
                 className="py-2 px-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1 active:scale-95"
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
                 <span>Buy at {(deal as any).retailerName} · {formatCurrency(finalPrice)}</span>
-              </a>
+              </button>
             </div>
             {(deal as any).resellerSecondary && (deal as any).resellerPrice && (
               <button

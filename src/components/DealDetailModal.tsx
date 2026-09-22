@@ -14,11 +14,13 @@ import {
   Sparkles,
   Layers,
   Clock,
-  DollarSign
+  DollarSign,
+  Share2
 } from "lucide-react";
 import { Deal } from "@/types";
 import { formatCurrency, parseJsonSafe } from "@/lib/utils";
 import { SupportNotice } from "@/components/SupportNotice";
+import { shareDeal, openAffiliateOrExternal } from "@/lib/native";
 
 interface DealDetailModalProps {
   deal: Deal | null;
@@ -69,6 +71,16 @@ export function DealDetailModal({
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              onClick={() => void shareDeal({ dealId: deal.id, title: deal.title })}
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+              title="Share deal"
+              aria-label="Share deal"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
               onClick={() => onToggleWatchlist(deal.id)}
               className={`p-2 rounded-xl transition ${
                 isWatchlisted
@@ -80,6 +92,7 @@ export function DealDetailModal({
               <Heart className={`w-4 h-4 ${isWatchlisted ? "fill-white" : ""}`} />
             </button>
             <button
+              type="button"
               onClick={onClose}
               className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition"
             >
@@ -174,15 +187,19 @@ export function DealDetailModal({
 
               {(deal as any).ctaType === "affiliate" ? (
                 <div className="space-y-2">
-                  <a
-                    href={(deal as any).redirectPath || `/api/go/${deal.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer sponsored"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void openAffiliateOrExternal({
+                        dealId: deal.id,
+                        redirectPath: (deal as any).redirectPath || `/api/go/${deal.id}`,
+                      })
+                    }
                     className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 font-black text-base shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 active:scale-98"
                   >
                     <ShoppingBag className="w-5 h-5" />
                     <span>Buy at {(deal as any).retailerName} • {formatCurrency(finalPrice)}</span>
-                  </a>
+                  </button>
                   {(deal as any).resellerSecondary && (deal as any).resellerPrice && (
                     <button
                       onClick={() => { onClose(); onBuyNow(deal); }}
