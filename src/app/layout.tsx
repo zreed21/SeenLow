@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { NativeShellInit } from "@/components/NativeShellInit";
 
 export const metadata: Metadata = {
   title: "SeenLow — Lowest we've seen. Checked again before you tap.",
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="bg-slate-950 text-slate-100 antialiased min-h-screen selection:bg-[#B91C1C] selection:text-white">
+        <NativeShellInit />
         {children}
       </body>
     </html>

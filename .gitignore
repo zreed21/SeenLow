@@ -67,3 +67,12 @@ desktop.ini
 *.zip
 *.tar
 *.tar.gz
+
+# Capacitor / native (local Mac build artifacts; commit ios/ project sources when generated)
+*.mobileprovision
+*.xcuserstate
+ios/App/Pods/
+ios/DerivedData/
+android/.gradle/
+android/app/build/
+android/build/
