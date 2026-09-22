@@ -137,6 +137,8 @@ export async function computeBestDeal() {
   const since = new Date(Date.now() - 30 * 86_400_000);
   let winner: { deal: typeof deals.$inferSelect; score: number; high: number; trust: number; rail: Rail } | null = null;
   for (const deal of candidates) {
+    // Sold-out / expired listings are never Best Deal winners.
+    if (["sold_out", "expired"].includes(deal.stockStatus)) continue;
     const source = sourceRows.find((s) => s.id === deal.sourceId);
     if (!source || !sourceCanPublish(source)) continue;
     const decision = resolveRail(deal, settings, source);
