@@ -1,61 +1,58 @@
-import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
 const globalForDb = globalThis as typeof globalThis & {
   __arenaNextJsPostgresqlPool?: Pool;
-  __arenaNextJsPostgresqlDb?: NodePgDatabase<Record<string, never>>;
+  __arenaNextJsPostgresqlDb?: NodePgDatabase;
 };
 
-function getDatabaseUrl() {
-  return process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
-}
-
-function getPool() {
-  if (globalForDb.__arenaNextJsPostgresqlPool) {
-    return globalForDb.__arenaNextJsPostgresqlPool;
-  }
-
-  const databaseUrl = getDatabaseUrl();
+function getDatabaseUrl(): string {
+  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL or POSTGRES_URL is required");
   }
+  return databaseUrl;
+}
 
+function createPool(): Pool {
+  const databaseUrl = getDatabaseUrl();
   const isLocal =
     databaseUrl.includes("127.0.0.1") || databaseUrl.includes("localhost");
-
-  const pool = new Pool({
+  return new Pool({
     connectionString: databaseUrl,
     ssl: isLocal ? undefined : { rejectUnauthorized: false },
   });
-
-  // Cache in all environments so serverless/warm instances reuse the pool,
-  // and so Next build workers that import this module do not recreate it repeatedly.
-  globalForDb.__arenaNextJsPostgresqlPool = pool;
-  return pool;
 }
 
-function getDb() {
-  if (globalForDb.__arenaNextJsPostgresqlDb) {
-    return globalForDb.__arenaNextJsPostgresqlDb;
+function getPool(): Pool {
+  if (!globalForDb.__arenaNextJsPostgresqlPool) {
+    globalForDb.__arenaNextJsPostgresqlPool = createPool();
   }
-  const db = drizzle(getPool());
-  globalForDb.__arenaNextJsPostgresqlDb = db;
-  return db;
+  return globalForDb.__arenaNextJsPostgresqlPool;
 }
 
-/** Lazy proxy: importing this module must not require env vars (Vercel `next build`). */
-export const db = new Proxy({} as NodePgDatabase<Record<string, never>>, {
+function getDb(): NodePgDatabase {
+  if (!globalForDb.__arenaNextJsPostgresqlDb) {
+    globalForDb.__arenaNextJsPostgresqlDb = drizzle(getPool());
+  }
+  return globalForDb.__arenaNextJsPostgresqlDb;
+}
+
+/** Lazy pool — does not connect or require env until first access. */
+export const pool: Pool = new Proxy({} as Pool, {
   get(_target, prop, receiver) {
-    const real = getDb() as unknown as Record<PropertyKey, unknown>;
-    const value = Reflect.get(real, prop, receiver);
+    const real = getPool();
+    const value = Reflect.get(real, prop, real);
     return typeof value === "function" ? value.bind(real) : value;
   },
 });
 
-export const pool = new Proxy({} as Pool, {
+/** Lazy drizzle client — safe to import during `next build` without DATABASE_URL. */
+export const db: NodePgDatabase = new Proxy({} as NodePgDatabase, {
   get(_target, prop, receiver) {
-    const real = getPool() as unknown as Record<PropertyKey, unknown>;
-    const value = Reflect.get(real, prop, receiver);
+    const real = getDb();
+    const value = Reflect.get(real as object, prop, real);
     return typeof value === "function" ? value.bind(real) : value;
   },
 });
