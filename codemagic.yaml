@@ -1,0 +1,76 @@
+# SeenLow — Codemagic CI for Capacitor iOS → TestFlight
+# Docs: docs/CODEMAGIC_IOS.md
+# Capacitor 8 uses SPM (CapApp-SPM); there is no CocoaPods App.xcworkspace.
+# Integration name MUST match Team integrations → Developer Portal key name exactly.
+
+workflows:
+  ios-testflight:
+    name: SeenLow iOS TestFlight
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      # Exact name of the App Store Connect API key in Codemagic UI
+      app_store_connect: Codemagic SeenLow
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.seenlow.app
+      vars:
+        # Paths relative to ios/App (run scripts cd there before build-ipa).
+        # SPM project: use --project, not --workspace (no Podfile / App.xcworkspace).
+        XCODE_PROJECT: "App.xcodeproj"
+        XCODE_SCHEME: "App"
+        # Numeric Apple ID from App Store Connect → App → General → App Information.
+        # Set APP_STORE_APPLE_ID in Codemagic Application / Environment variables
+        # (or an env group listed under `groups` below). Do NOT invent a fake ID.
+        APP_STORE_APPLE_ID: $APP_STORE_APPLE_ID
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm ci || npm install
+      - name: Capacitor sync iOS (no local Next build)
+        script: |
+          # capacitor.config.ts sets server.url = https://seenlow.com, so the
+          # native shell loads production — skip `next build` / webDir compile.
+          npx cap sync ios
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Increment build number
+        script: |
+          cd "$CM_BUILD_DIR/ios/App"
+          # Prefer latest App Store / TestFlight build; fall back to Codemagic $BUILD_NUMBER
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || true)
+          if [ -z "${LATEST_BUILD_NUMBER}" ] || ! [ "${LATEST_BUILD_NUMBER}" -eq "${LATEST_BUILD_NUMBER}" ] 2>/dev/null; then
+            echo "No App Store build number found; using Codemagic BUILD_NUMBER=$BUILD_NUMBER"
+            UPDATED_BUILD_NUMBER=$BUILD_NUMBER
+          else
+            UPDATED_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
+          fi
+          agvtool new-version -all "$UPDATED_BUILD_NUMBER"
+          echo "CFBundleVersion set to $UPDATED_BUILD_NUMBER"
+      - name: Build ipa for distribution
+        script: |
+          cd "$CM_BUILD_DIR/ios/App"
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - ios/App/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      email:
+        recipients:
+          - support@seenlow.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # Add beta_groups once created in App Store Connect / TestFlight.
+        submit_to_app_store: false

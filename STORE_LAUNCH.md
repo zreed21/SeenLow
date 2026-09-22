@@ -20,6 +20,8 @@ When an LLC is formed later, update Disclosure / Privacy / Terms and migrate (or
 
 ## iOS (App Store) — Capacitor path
 
+**No Mac?** Use Codemagic CI ([docs/CODEMAGIC_IOS.md](./docs/CODEMAGIC_IOS.md)) — connect GitHub, add App Store Connect API key named exactly `Codemagic SeenLow`, set `APP_STORE_APPLE_ID`, run workflow `ios-testflight`. Local Mac/Xcode steps below remain optional.
+
 1. **Apple Developer (paid individual)** — already enrolled.
 2. App Store Connect: complete **Agreements, Tax, and Banking** before first upload.
 3. Register explicit App ID **`com.seenlow.app`** (Identifiers → App IDs). Enable capabilities you will use:
