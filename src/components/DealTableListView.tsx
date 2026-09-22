@@ -114,16 +114,16 @@ export function DealTableListView({
                       >
                         Details
                       </button>
-                      {(deal as any).ctaType === "affiliate" ? (
+                      {deal.ctaType === "affiliate" ? (
                         <a
-                          href={(deal as any).redirectPath || `/api/go/${deal.id}`}
+                          href={deal.redirectPath || `/api/go/${deal.id}`}
                           target="_blank"
                           rel="noopener noreferrer sponsored"
                           title="We may earn a commission if you buy."
                           className="py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 flex items-center gap-1"
                         >
                           <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>Buy at {(deal as any).retailerName}</span>
+                          <span>Buy at {deal.retailerName}</span>
                         </a>
                       ) : (
                         <button

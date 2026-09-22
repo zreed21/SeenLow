@@ -6,12 +6,13 @@ export interface Deal {
   category: string;
   brand: string;
   originalPrice: string; // MSRP
-  dealPrice: string; // Scraped price
+  dealPrice: string; // Scraped / display price depending on rail
   serviceFee: string; // Internal combined price adjustment (markup and processing recovery)
-  finalPrice: string; // dealPrice + serviceFee
+  finalPrice: string; // Customer-facing price on the public feed
   discountPercent: string; // % off
-  retailer: string;
-  retailerUrl: string;
+  /** Present on admin/internal payloads; stripped from public affiliate feed. */
+  retailer?: string;
+  retailerUrl?: string;
   imageUrl: string;
   additionalImages: string; // JSON string
   features: string; // JSON string
@@ -25,11 +26,20 @@ export interface Deal {
   lastScrapedAt: string;
   lastVerifiedAt: string;
   verificationStatus: "verified_active" | "price_changed" | "out_of_stock" | "pending_check";
-  verificationNotes: string | null;
+  verificationNotes?: string | null;
   opportunityScore: number;
   dealExpiresAt: string | null;
   createdAt: string;
   updatedAt: string;
+  // Public rail fields from /api/deals via publicRailFields()
+  ctaType?: "affiliate" | "reseller" | "sponsored";
+  ctaLabel?: string;
+  retailerName?: string | null;
+  displayPrice?: string;
+  resellerSecondary?: boolean;
+  resellerPrice?: string | null;
+  commissionDisclosure?: string | null;
+  redirectPath?: string | null;
 }
 
 export interface OrderHistoryItem {

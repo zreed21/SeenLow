@@ -21,10 +21,12 @@ async function ensureTable() {
       "check_status" text NOT NULL DEFAULT 'queued',
       "check_notes" text,
       "deal_id" integer,
+      "image_url" text,
       "created_at" timestamp NOT NULL DEFAULT now(),
       "updated_at" timestamp NOT NULL DEFAULT now()
     )
   `);
+  await db.execute(sql`ALTER TABLE deal_inbox ADD COLUMN IF NOT EXISTS image_url text`);
 }
 
 function normalizeAmazonUrl(raw: string): { url: string; asin: string | null; domain: string } {
@@ -65,7 +67,7 @@ export async function GET() {
   await ensureTable();
   const rows = await db.execute(sql`
     SELECT id, url, title, asin, domain, listed_price, sale_price, ends_at,
-           last_checked_at, check_status, check_notes, deal_id, created_at
+           last_checked_at, check_status, check_notes, deal_id, image_url, created_at
     FROM deal_inbox
     ORDER BY id DESC
     LIMIT 200
