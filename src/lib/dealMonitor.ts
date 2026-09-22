@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { deals } from "@/db/schema";
 import { refreshCatalogPricing } from "@/lib/catalogPricing";
 import { ensureDealInboxTable, firstInboxRow, inboxRows } from "@/lib/dealInboxSchema";
-import { applyScrapedPriceToDeal, scrapeProductPrice } from "@/lib/priceScrape";
+import { applyScrapedPriceToDeal, isHighConfidenceUnavailable, scrapeProductPrice } from "@/lib/priceScrape";
 
 /** Stop monitoring when discount falls to 50% or below (not a deal anymore). */
 export const MIN_DEAL_DISCOUNT_PERCENT = 50;
@@ -94,7 +94,7 @@ export async function runDealMonitor(opts?: { onlyInboxId?: number; limit?: numb
         ends_at = COALESCE(${scrape.endsAt}, ends_at),
         last_checked_at = now(),
         last_monitored_at = now(),
-        check_status = ${scrape.ok ? (scrape.available === false ? "unavailable" : "priced") : "failed"},
+        check_status = ${scrape.ok ? (isHighConfidenceUnavailable(scrape) ? "unavailable" : "priced") : "failed"},
         check_notes = ${scrape.notes},
         updated_at = now()
       WHERE id = ${inboxId}
@@ -113,7 +113,7 @@ export async function runDealMonitor(opts?: { onlyInboxId?: number; limit?: numb
     const discount = Number(deal.discountPercent);
     const soldOut =
       deal.stockStatus === "sold_out" ||
-      (scrape.ok && scrape.available === false);
+      (scrape.ok && isHighConfidenceUnavailable(scrape));
 
     if (soldOut) {
       await stopMonitoring(inboxId, dealId, "sold_out", scrape.notes || `stockStatus=${deal.stockStatus}`);
