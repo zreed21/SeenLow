@@ -4,12 +4,13 @@ import { deals, sources, crawlerLogs, notifications } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { refreshCatalogPricing } from "@/lib/catalogPricing";
 import { applySourceGate, scanSourcePage, upsertSourceFromScan } from "@/lib/sourceCertification";
+import { applyScrapedPriceToDeal, scrapeDealInbox, scrapeProductPrice } from "@/lib/priceScrape";
+
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
     const startTime = new Date();
-    // Unknown/test-buy sources are rescored hourly. Allowlisted known chains keep
-    // their 90-day certification and avoid unnecessary network traffic.
     const sourceRows = await db.select().from(sources);
     const catalogBefore = await db.select().from(deals);
     for (const source of sourceRows.filter((row) => row.status !== "blocked" &&
@@ -25,6 +26,22 @@ export async function POST(request: NextRequest) {
         await applySourceGate(source.id);
       }
     }
+
+    let scraped = 0;
+    const liveTargets = catalogBefore.filter((deal) => deal.isActive && deal.retailerUrl).slice(0, 10);
+    for (const deal of liveTargets) {
+      try {
+        const scrape = await scrapeProductPrice(deal.retailerUrl);
+        if (scrape.ok) {
+          await applyScrapedPriceToDeal(deal.id, scrape);
+          scraped++;
+        }
+      } catch {
+        /* keep last stored price */
+      }
+    }
+    try { await scrapeDealInbox(15); } catch { /* inbox table may not exist yet */ }
+
     await refreshCatalogPricing();
     const allDeals = await db.select().from(deals);
 
@@ -52,9 +69,8 @@ export async function POST(request: NextRequest) {
     const completedTime = new Date();
     const logMessages = [
       `[${startTime.toISOString().split("T")[1].slice(0, 8)}] Hourly price and availability check started.`,
-      `[Availability] Validating all displayed items and reserve deals.`,
+      `[Scrape] Live retailer prices updated on ${scraped} catalog URLs.`,
       `[Stock Audit] ${verifiedCount}/50 daily deals verified active and available.`,
-      `[Ranking] Unavailable items removed and next-best active deals promoted automatically.`,
       `[Status] Daily Top 50 refreshed. Next check scheduled in 60 minutes.`
     ];
 
@@ -62,7 +78,7 @@ export async function POST(request: NextRequest) {
       runType: "hourly_verification",
       status: "completed",
       dealsScanned: verifiedCount,
-      dealsUpdated: verifiedCount,
+      dealsUpdated: scraped,
       dealsExpired: 0,
       topDiscountFound: allDeals[0]?.discountPercent || "75.00",
       logOutput: JSON.stringify(logMessages),
@@ -70,11 +86,10 @@ export async function POST(request: NextRequest) {
       completedAt: completedTime,
     }).returning();
 
-    // System notification
     await db.insert(notifications).values({
       userId: "demo-user-1",
-      title: "🛡️ Hourly Deal Healthcheck Passed",
-      message: `Verified ${verifiedCount} daily deals. Unavailable products were automatically replaced from the reserve list.`,
+      title: "Hourly Deal Healthcheck Passed",
+      message: `Verified ${verifiedCount} daily deals. Live-scraped ${scraped} catalog prices.`,
       type: "hourly_check_alert",
       isRead: false,
       link: "/crawler",
@@ -84,6 +99,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Verified ${verifiedCount} deals are active`,
       verifiedCount,
+      scraped,
       lastVerifiedAt: completedTime.toISOString(),
       log: logEntry[0],
     });
