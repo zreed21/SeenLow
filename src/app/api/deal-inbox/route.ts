@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { getSessionUser } from "@/lib/auth";
+import { parseEndsAt } from "@/lib/dealInboxTime";
 
 const AMAZON_TAG = "seenlow-20";
 
@@ -49,18 +50,6 @@ function normalizeAmazonUrl(raw: string): { url: string; asin: string | null; do
     domain = "";
   }
   return { url, asin, domain };
-}
-
-function parseEndsAt(value: unknown): Date | null {
-  if (!value) return null;
-  const raw = String(value).trim();
-  if (!raw) return null;
-  const hours = raw.match(/^(\d+(?:\.\d+)?)\s*h/i);
-  if (hours) return new Date(Date.now() + Number(hours[1]) * 3600 * 1000);
-  const mins = raw.match(/^(\d+)\s*m/i);
-  if (mins) return new Date(Date.now() + Number(mins[1]) * 60 * 1000);
-  const d = new Date(raw);
-  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 async function requireAdmin() {
@@ -115,7 +104,7 @@ export async function POST(request: NextRequest) {
         ${sale},
         ${endsAt},
         ${sale ? "priced" : "queued"},
-        ${sale ? "Manual price saved. Amazon pages often block live fetch." : "Queued. Add sale price if the live check cannot read the page."},
+        ${endsAt ? "Timer saved as time remaining." : (sale ? "Manual price saved." : "Queued. Add sale price to publish.")},
         now()
       )
       ON CONFLICT (url) DO UPDATE SET
@@ -128,7 +117,7 @@ export async function POST(request: NextRequest) {
     saved.push(n);
   }
   const rows = await db.execute(sql`SELECT * FROM deal_inbox ORDER BY id DESC LIMIT 200`);
-  return NextResponse.json({ success: true, added: saved.length, links: (rows as { rows?: unknown }).rows || rows });
+  return NextResponse.json({ success: true, added: saved.length, endsAt, links: (rows as { rows?: unknown }).rows || rows });
 }
 
 export async function DELETE(request: NextRequest) {
