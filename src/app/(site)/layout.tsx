@@ -40,7 +40,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           <Link href="/" style={{ textDecoration: "none" }} aria-label="SeenLow Home">
             <SeenLowLogo variant="lockup" size="md" />
           </Link>
-          <nav style={{ display: "flex", gap: "1rem", fontSize: "0.8125rem", fontWeight: 600 }}>
+          <nav style={{ display: "flex", flexWrap: "wrap", gap: "1rem", fontSize: "0.8125rem", fontWeight: 600 }}>
             <Link
               href="/disclosure"
               style={{ color: "#F0E6D8", textDecoration: "none" }}
@@ -54,10 +54,22 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
               Privacy
             </Link>
             <Link
+              href="/terms"
+              style={{ color: "#F0E6D8", textDecoration: "none" }}
+            >
+              Terms
+            </Link>
+            <Link
               href="/advertise"
               style={{ color: "#F0E6D8", textDecoration: "none" }}
             >
               Advertise
+            </Link>
+            <Link
+              href="/account-deletion"
+              style={{ color: "#F0E6D8", textDecoration: "none" }}
+            >
+              Delete account
             </Link>
           </nav>
         </div>

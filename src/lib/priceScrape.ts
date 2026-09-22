@@ -14,6 +14,7 @@ export type ScrapedPrice = {
   available: boolean | null;
   endsAt: Date | null;
   currency: string | null;
+  imageUrl: string | null;
   notes: string;
 };
 
@@ -90,6 +91,27 @@ function htmlMeta(html: string, key: string) {
   return prop?.[1] || rev?.[1] || null;
 }
 
+function extractProductImage(html: string, products: any[]): string | null {
+  const fromMeta =
+    htmlMeta(html, "og:image") ||
+    htmlMeta(html, "og:image:secure_url") ||
+    htmlMeta(html, "twitter:image");
+  if (fromMeta && /^https?:\/\//i.test(fromMeta)) return fromMeta;
+  for (const product of products) {
+    const img = product?.image;
+    if (typeof img === "string" && /^https?:\/\//i.test(img)) return img;
+    if (Array.isArray(img)) {
+      for (const item of img) {
+        if (typeof item === "string" && /^https?:\/\//i.test(item)) return item;
+        if (item?.url && /^https?:\/\//i.test(item.url)) return item.url;
+      }
+    }
+    if (img?.url && /^https?:\/\//i.test(img.url)) return img.url;
+  }
+  return null;
+}
+
+
 function parseCountdown(html: string): Date | null {
   const ms = html.match(/"msToEnd"\s*:\s*(\d+)/i) || html.match(/"remainingDealTime"\s*:\s*(\d+)/i);
   if (ms) {
@@ -146,15 +168,15 @@ async function fetchHtml(url: string, timeout = 9_000): Promise<{ url: string; h
 export async function scrapeProductPrice(rawUrl: string): Promise<ScrapedPrice> {
   const start = rawUrl.trim();
   if (!/^https:\/\//i.test(start)) {
-    return { ok: false, url: start, finalUrl: start, title: null, salePrice: null, listedPrice: null, available: null, endsAt: null, currency: null, notes: "Only HTTPS URLs can be scraped." };
+    return { ok: false, url: start, finalUrl: start, title: null, salePrice: null, listedPrice: null, available: null, endsAt: null, currency: null, imageUrl: null, notes: "Only HTTPS URLs can be scraped." };
   }
   try {
     const host = new URL(start).hostname;
     if (isNonUsStorefrontHost(host)) {
-      return { ok: false, url: start, finalUrl: start, title: null, salePrice: null, listedPrice: null, available: false, endsAt: null, currency: null, notes: `Non-US storefront (${host}) skipped.` };
+      return { ok: false, url: start, finalUrl: start, title: null, salePrice: null, listedPrice: null, available: false, endsAt: null, currency: null, imageUrl: null, notes: `Non-US storefront (${host}) skipped.` };
     }
   } catch {
-    return { ok: false, url: start, finalUrl: start, title: null, salePrice: null, listedPrice: null, available: null, endsAt: null, currency: null, notes: "Invalid URL." };
+    return { ok: false, url: start, finalUrl: start, title: null, salePrice: null, listedPrice: null, available: null, endsAt: null, currency: null, imageUrl: null, notes: "Invalid URL." };
   }
 
   const asin = extractAsin(start);
@@ -193,6 +215,7 @@ export async function scrapeProductPrice(rawUrl: string): Promise<ScrapedPrice> 
       const endsAt = parseCountdown(page.html);
       if (sale) {
         if (listed && listed < sale) listed = sale;
+        const imageUrl = extractProductImage(page.html, products);
         return {
           ok: true,
           url: start,
@@ -203,7 +226,8 @@ export async function scrapeProductPrice(rawUrl: string): Promise<ScrapedPrice> 
           available,
           endsAt,
           currency: "USD",
-          notes: `Live scrape ${page.status}${endsAt ? "; countdown found" : ""}`,
+          imageUrl,
+          notes: `Live scrape ${page.status}${endsAt ? "; countdown found" : ""}${imageUrl ? "; image found" : ""}`,
         };
       }
       lastError = `HTTP ${page.status}; price not found in HTML`;
@@ -222,6 +246,7 @@ export async function scrapeProductPrice(rawUrl: string): Promise<ScrapedPrice> 
     available: null,
     endsAt: null,
     currency: null,
+    imageUrl: null,
     notes: `Scrape failed: ${lastError}. Keep the last typed price or retry.`,
   };
 }
@@ -250,6 +275,8 @@ export async function applyScrapedPriceToDeal(dealId: number, scrape: ScrapedPri
 }
 
 export async function scrapeDealInbox(_limit = 15, onlyId?: number) {
+  // Best-effort column for scraped / Open Graph product images (idempotent).
+  await db.execute(sql`ALTER TABLE deal_inbox ADD COLUMN IF NOT EXISTS image_url text`);
   const rows = onlyId
     ? await db.execute(sql`SELECT * FROM deal_inbox WHERE id = ${onlyId} LIMIT 1`)
     : await db.execute(sql`SELECT * FROM deal_inbox ORDER BY id DESC LIMIT 15`);
@@ -263,6 +290,7 @@ export async function scrapeDealInbox(_limit = 15, onlyId?: number) {
         sale_price = COALESCE(${scrape.salePrice}, sale_price),
         listed_price = COALESCE(${scrape.listedPrice}, listed_price),
         ends_at = COALESCE(${scrape.endsAt}, ends_at),
+        image_url = COALESCE(${scrape.imageUrl}, image_url),
         last_checked_at = now(),
         check_status = ${scrape.ok ? (scrape.available === false ? "unavailable" : "priced") : "failed"},
         check_notes = ${scrape.notes},
@@ -270,7 +298,7 @@ export async function scrapeDealInbox(_limit = 15, onlyId?: number) {
       WHERE id = ${Number(row.id)}
     `);
     if (row.deal_id && scrape.ok) await applyScrapedPriceToDeal(Number(row.deal_id), scrape);
-    results.push({ id: row.id, url: row.url, ok: scrape.ok, salePrice: scrape.salePrice, notes: scrape.notes });
+    results.push({ id: row.id, url: row.url, ok: scrape.ok, salePrice: scrape.salePrice, imageUrl: scrape.imageUrl, notes: scrape.notes });
   }
   return results;
 }

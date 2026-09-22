@@ -9,6 +9,23 @@ import { scanSourcePage, sourceCanPublish, upsertSourceFromScan } from "@/lib/so
 
 const TAG = "seenlow-20";
 
+const SEENLOW_PLACEHOLDER = "/images/deal-placeholder.svg";
+
+function pickInboxImage(row: Record<string, unknown>): string {
+  const candidates = [
+    row.image_url,
+    row.imageUrl,
+    row.og_image,
+    row.ogImage,
+  ];
+  for (const raw of candidates) {
+    const url = String(raw || "").trim();
+    if (!url) continue;
+    if (url.startsWith("/") || /^https:\/\//i.test(url)) return url;
+  }
+  return SEENLOW_PLACEHOLDER;
+}
+
 function firstRow(result: unknown): Record<string, unknown> | null {
   if (!result) return null;
   if (Array.isArray(result)) return (result[0] as Record<string, unknown>) || null;
@@ -69,7 +86,7 @@ export async function POST(request: NextRequest) {
     discountPercent: fields.discountPercent,
     retailer: amazon ? "Amazon" : String(row.domain || "Retailer"),
     retailerUrl: url,
-    imageUrl: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&auto=format&fit=crop&q=80",
+    imageUrl: pickInboxImage(row),
     stockStatus: "in_stock",
     stockQuantity: 10,
     dealRank: 1,

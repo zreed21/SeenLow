@@ -143,7 +143,7 @@ export function DealCard({
         </div>
 
         {/* Action Buttons — rail-aware. Affiliate = outbound redirect at THEIR price. */}
-        {(deal as any).ctaType === "affiliate" ? (
+        {deal.ctaType === "affiliate" ? (
           <div className="space-y-2 pt-2 border-t border-slate-800/80">
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -154,21 +154,21 @@ export function DealCard({
                 <span>Details & Specs</span>
               </button>
               <a
-                href={(deal as any).redirectPath || `/api/go/${deal.id}`}
+                href={deal.redirectPath || `/api/go/${deal.id}`}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
                 className="py-2 px-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1 active:scale-95"
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Buy at {(deal as any).retailerName} · {formatCurrency(finalPrice)}</span>
+                <span>Buy at {deal.retailerName} · {formatCurrency(finalPrice)}</span>
               </a>
             </div>
-            {(deal as any).resellerSecondary && (deal as any).resellerPrice && (
+            {deal.resellerSecondary && deal.resellerPrice && (
               <button
                 onClick={() => onQuickBuy(deal)}
                 className="w-full py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 border border-slate-700/60 text-[11px] font-medium transition"
               >
-                Have us buy it · {formatCurrency((deal as any).resellerPrice)}
+                Have us buy it · {formatCurrency(Number(deal.resellerPrice))}
               </button>
             )}
             <p className="text-[10px] text-slate-500 text-center">We may earn a commission if you buy.</p>

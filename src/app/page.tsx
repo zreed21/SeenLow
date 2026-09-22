@@ -120,6 +120,33 @@ export default function Home() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    const typed = window.prompt(
+      'Permanently delete your SeenLow account? Type "delete" to confirm. Orders are kept in anonymized form for accounting.'
+    );
+    if (!typed || typed.trim().toLowerCase() !== "delete") return;
+    try {
+      const res = await fetch("/api/auth/delete-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "delete" }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        window.alert(data.error || "Could not delete account.");
+        return;
+      }
+      setCurrentUser(null);
+      setWatchlistItems([]);
+      setWatchlistSet(new Set());
+      setOrders([]);
+      if (activeTab === "admin") setActiveTab("top50");
+      window.alert("Your account has been deleted.");
+    } catch {
+      window.alert("Could not delete account. Email support@seenlow.com.");
+    }
+  };
+
   const rememberGuestEmail = (email: string) => {
     setGuestEmail(email);
     localStorage.setItem("fd-guest-email", email);
@@ -335,6 +362,7 @@ export default function Home() {
         onSignIn={() => setAuthModal({ open: true, mode: "login" })}
         onRegister={() => setAuthModal({ open: true, mode: "register" })}
         onSignOut={handleSignOut}
+        onDeleteAccount={handleDeleteAccount}
         onRefreshDeals={fetchDeals}
         isRefreshing={isRefreshing}
         orderCount={orders.length}

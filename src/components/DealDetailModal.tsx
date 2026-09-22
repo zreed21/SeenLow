@@ -164,35 +164,46 @@ export function DealDetailModal({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs">
-                <Truck className="w-5 h-5 text-amber-400 shrink-0" />
-                <div className="text-[11px] text-slate-300">
-                  <strong className="text-white">Tracked delivery:</strong> Carrier tracking updates are available inside the app from order confirmation through delivery.
+              {deal.ctaType === "affiliate" ? (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs">
+                  <ExternalLink className="w-5 h-5 text-amber-400 shrink-0" />
+                  <div className="text-[11px] text-slate-300">
+                    <strong className="text-white">Retailer checkout:</strong> You&apos;ll complete purchase on{" "}
+                    {deal.retailerName || "the retailer"}&apos;s site. They handle payment, shipping, tracking, and returns.
+                    {deal.commissionDisclosure ? ` ${deal.commissionDisclosure}` : " We may earn a commission if you buy."}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs">
+                  <Truck className="w-5 h-5 text-amber-400 shrink-0" />
+                  <div className="text-[11px] text-slate-300">
+                    <strong className="text-white">Tracked delivery:</strong> After you pay SeenLow, carrier tracking updates are available from order confirmation through delivery. A partner retailer may fulfill the shipment.
+                  </div>
+                </div>
+              )}
               <SupportNotice compact />
 
-              {(deal as any).ctaType === "affiliate" ? (
+              {deal.ctaType === "affiliate" ? (
                 <div className="space-y-2">
                   <a
-                    href={(deal as any).redirectPath || `/api/go/${deal.id}`}
+                    href={deal.redirectPath || `/api/go/${deal.id}`}
                     target="_blank"
                     rel="noopener noreferrer sponsored"
                     className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 font-black text-base shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 active:scale-98"
                   >
                     <ShoppingBag className="w-5 h-5" />
-                    <span>Buy at {(deal as any).retailerName} • {formatCurrency(finalPrice)}</span>
+                    <span>Buy at {deal.retailerName} • {formatCurrency(finalPrice)}</span>
                   </a>
-                  {(deal as any).resellerSecondary && (deal as any).resellerPrice && (
+                  {deal.resellerSecondary && deal.resellerPrice && (
                     <button
                       onClick={() => { onClose(); onBuyNow(deal); }}
                       className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition"
                     >
-                      Have us buy it • {formatCurrency((deal as any).resellerPrice)}
+                      Have us buy it • {formatCurrency(Number(deal.resellerPrice))}
                     </button>
                   )}
                   <p className="text-[10px] text-slate-500 text-center">
-                    We may earn a commission if you buy. You&apos;ll purchase directly from {(deal as any).retailerName}, who handles payment, shipping, and returns.
+                    We may earn a commission if you buy. You&apos;ll purchase directly from {deal.retailerName}, who handles payment, shipping, and returns.
                   </p>
                 </div>
               ) : (

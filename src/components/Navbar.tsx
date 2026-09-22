@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Clock, ShieldCheck, Bell, ShoppingBag, RefreshCw, ChevronDown, Sun, Moon, LogOut, LogIn, UserPlus, Sliders } from "lucide-react";
+import { Clock, ShieldCheck, Bell, ShoppingBag, RefreshCw, ChevronDown, Sun, Moon, LogOut, LogIn, UserPlus, Sliders, Trash2 } from "lucide-react";
 import { getTimeUntilMidnight } from "@/lib/utils";
 import { NotificationItem } from "@/types";
 import { SessionUser } from "@/components/AuthModal";
@@ -14,6 +14,7 @@ interface NavbarProps {
   onSignIn: () => void;
   onRegister: () => void;
   onSignOut: () => void;
+  onDeleteAccount?: () => void;
   onRefreshDeals: () => void;
   isRefreshing: boolean;
   orderCount: number;
@@ -26,6 +27,7 @@ export function Navbar({
   onSignIn,
   onRegister,
   onSignOut,
+  onDeleteAccount,
   onRefreshDeals,
   isRefreshing,
   orderCount,
@@ -233,6 +235,17 @@ export function Navbar({
                     >
                       <LogOut className="w-3.5 h-3.5" /> Sign out
                     </button>
+                    {onDeleteAccount && currentUser.role !== "admin" && (
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          onDeleteAccount();
+                        }}
+                        className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-red-950/40 text-red-300 hover:text-red-200 border-t border-slate-800 mt-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete account
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
