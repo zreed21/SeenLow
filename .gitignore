@@ -62,6 +62,8 @@ desktop.ini
 *.key
 *.p12
 *.pfx
+*.p8
+AuthKey_*.p8
 
 # Archives
 *.zip

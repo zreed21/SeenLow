@@ -25,9 +25,13 @@ This is **not** a bare WKWebView submission: share sheet, SFSafariViewController
 3. Run `npm run mobile:prepare` / `npx cap sync ios`.
 4. Keep affiliate tracking via absolute `https://seenlow.com/api/go/...` URLs.
 
-## What requires a Mac
+## Building without a Mac (Codemagic)
 
-The `ios/` Xcode project **is committed** on this branch (generated via Capacitor CLI). You still need a **Mac + Xcode** to sign, archive, and upload to TestFlight — Linux cannot run the iOS toolchain.
+**Preferred for Windows:** use **Codemagic** cloud Macs so you never need a local Mac. Root [`codemagic.yaml`](../codemagic.yaml) workflow `ios-testflight` signs with App Store Connect API and uploads to TestFlight. Full Windows checklist: **[CODEMAGIC_IOS.md](./CODEMAGIC_IOS.md)**. Integration key name in Codemagic UI must be exactly `Codemagic SeenLow`.
+
+## What requires a Mac (optional local path)
+
+The `ios/` Xcode project **is committed** on this branch (generated via Capacitor CLI). Local archive/upload still needs a **Mac + Xcode**. Linux/Windows cannot run the iOS toolchain locally — use Codemagic instead (above).
 
 ```bash
 # On a Mac (Node 22+ required for Capacitor 8 CLI)
