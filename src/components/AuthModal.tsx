@@ -63,43 +63,57 @@ export function AuthModal({
     }
   };
 
+  // Hardcoded hex colors: html.light remaps Tailwind `text-white` / slate-* to dark
+  // ink, which made inputs black-on-black inside this always-dark modal.
+  const fieldClass =
+    "w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#0A0A0A] border border-[#404040] focus:border-[#B91C1C] text-[#FFFFFF] placeholder:text-[#737373] caret-white outline-none [color-scheme:dark] [&:-webkit-autofill]:[-webkit-text-fill-color:#FFFFFF] [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#0A0A0A]";
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div className="w-full max-w-md bg-[#121212] border border-neutral-800 rounded-3xl p-6 shadow-2xl text-slate-200 space-y-5">
+      <div
+        className="w-full max-w-md bg-[#121212] border border-[#404040] rounded-3xl p-6 shadow-2xl space-y-5"
+        style={{ color: "#E5E5E5", colorScheme: "dark" }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SeenLowLogo variant="icon" size="sm" />
             <div>
-              <h3 className="font-black text-white text-base">
+              <h3 className="font-black text-base" style={{ color: "#FFFFFF" }}>
                 {mode === "login" ? "Sign in to SeenLow" : "Create your SeenLow account"}
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px]" style={{ color: "#A3A3A3" }}>
                 Lowest we&apos;ve seen. Checked again before you tap.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-neutral-900 text-slate-400 hover:text-white border border-neutral-800"
+            className="p-2 rounded-xl bg-[#1A1A1A] border border-[#404040] hover:opacity-90"
+            style={{ color: "#A3A3A3" }}
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex bg-[#0A0A0A] p-1 rounded-xl border border-neutral-800 text-xs font-semibold">
+        <div className="flex bg-[#0A0A0A] p-1 rounded-xl border border-[#404040] text-xs font-semibold">
           <button
+            type="button"
             onClick={() => setMode("login")}
             className={`flex-1 py-2 rounded-lg transition ${
-              mode === "login" ? "bg-[#B91C1C] text-white" : "text-slate-400 hover:text-white"
+              mode === "login" ? "bg-[#B91C1C]" : "hover:opacity-90"
             }`}
+            style={{ color: mode === "login" ? "#FFFFFF" : "#A3A3A3" }}
           >
             Sign in
           </button>
           <button
+            type="button"
             onClick={() => setMode("register")}
             className={`flex-1 py-2 rounded-lg transition ${
-              mode === "register" ? "bg-[#B91C1C] text-white" : "text-slate-400 hover:text-white"
+              mode === "register" ? "bg-[#B91C1C]" : "hover:opacity-90"
             }`}
+            style={{ color: mode === "register" ? "#FFFFFF" : "#A3A3A3" }}
           >
             Create account
           </button>
@@ -108,38 +122,40 @@ export function AuthModal({
         <form onSubmit={submit} className="space-y-3 text-xs">
           {mode === "register" && (
             <label className="block">
-              <span className="text-slate-400">Name</span>
+              <span style={{ color: "#A3A3A3" }}>Name</span>
               <div className="relative mt-1">
-                <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                <User className="w-4 h-4 absolute left-3 top-2.5" style={{ color: "#737373" }} />
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#0A0A0A] border border-neutral-800 focus:border-[#B91C1C] text-white outline-none"
+                  className={fieldClass}
+                  autoComplete="name"
                 />
               </div>
             </label>
           )}
 
           <label className="block">
-            <span className="text-slate-400">Email</span>
+            <span style={{ color: "#A3A3A3" }}>Email</span>
             <div className="relative mt-1">
-              <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+              <Mail className="w-4 h-4 absolute left-3 top-2.5" style={{ color: "#737373" }} />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@seenlow.com"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#0A0A0A] border border-neutral-800 focus:border-[#B91C1C] text-white outline-none"
+                placeholder="you@example.com"
+                className={fieldClass}
+                autoComplete="email"
               />
             </div>
           </label>
 
           <label className="block">
-            <span className="text-slate-400">Password</span>
+            <span style={{ color: "#A3A3A3" }}>Password</span>
             <div className="relative mt-1">
-              <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+              <Lock className="w-4 h-4 absolute left-3 top-2.5" style={{ color: "#737373" }} />
               <input
                 type="password"
                 required
@@ -147,13 +163,14 @@ export function AuthModal({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#0A0A0A] border border-neutral-800 focus:border-[#B91C1C] text-white outline-none"
+                className={fieldClass}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
               />
             </div>
           </label>
 
           {mode === "register" && (
-            <label className="flex items-center gap-2 text-slate-300">
+            <label className="flex items-center gap-2" style={{ color: "#D4D4D4" }}>
               <input
                 type="checkbox"
                 checked={subscribe}
@@ -165,24 +182,23 @@ export function AuthModal({
           )}
 
           {error && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-950/40 border border-red-900/60 text-red-300">
+            <div
+              className="flex items-center gap-2 p-2.5 rounded-xl border"
+              style={{ background: "rgba(69,10,10,0.4)", borderColor: "rgba(127,29,29,0.6)", color: "#FCA5A5" }}
+            >
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <button
+            type="submit"
             disabled={busy}
-            className="w-full py-3 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-black flex items-center justify-center gap-2 disabled:opacity-50 transition shadow-lg shadow-red-950/40"
+            className="w-full py-3 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] font-black flex items-center justify-center gap-2 disabled:opacity-50 transition shadow-lg shadow-red-950/40"
+            style={{ color: "#FFFFFF" }}
           >
             {busy ? "Please wait..." : mode === "login" ? "Sign in to SeenLow" : "Create SeenLow account"}
           </button>
-
-          {mode === "login" && (
-            <p className="text-[11px] text-slate-500 text-center">
-              Demo: sarah.connor@opportunitydeals.com / fire2024
-            </p>
-          )}
         </form>
       </div>
     </div>
