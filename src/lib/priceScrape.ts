@@ -104,6 +104,11 @@ function parseCountdown(html: string): Date | null {
   return null;
 }
 
+
+function looksLikeBotBlock(html: string): boolean {
+  return /robot check|automated access|enter the characters you see|api-services-support@amazon\.com|sorry,? we just need to make sure you.?re not a robot|validateCaptcha|opfcaptcha/i.test(html);
+}
+
 function parseHtmlPrices(html: string) {
   const sale = firstMoney([
     html.match(/"priceAmount"\s*:\s*([0-9.]+)/)?.[1],
@@ -124,8 +129,15 @@ function parseHtmlPrices(html: string) {
     htmlMeta(html, "og:title") ||
     html.match(/<title>([^<]+)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ||
     null;
-  const unavailable = /currently unavailable|out of stock|this item cannot be shipped|we don't know when or if this item will be back/i.test(html);
-  return { sale, listed, title, available: unavailable ? false : sale ? true : null };
+  const strongOos = /currently unavailable|we don't know when or if this item will be back|this item cannot be shipped to your/i.test(html);
+  const weakOos = /out of stock/i.test(html);
+  // Strong OOS phrases win; weak "out of stock" alone on a page that also has a price is ambiguous
+  // (common on bot-challenge shells and partial HTML). Prefer null over false sold_out flips.
+  let available: boolean | null = null;
+  if (strongOos) available = false;
+  else if (weakOos && !sale) available = false;
+  else if (sale) available = true;
+  return { sale, listed, title, available };
 }
 
 async function fetchHtml(url: string, timeout = 9_000): Promise<{ url: string; html: string; status: number }> {
@@ -170,6 +182,10 @@ export async function scrapeProductPrice(rawUrl: string): Promise<ScrapedPrice> 
       const page = await fetchHtml(attempt);
       if (page.status >= 400) {
         lastError = `HTTP ${page.status}`;
+        continue;
+      }
+      if (looksLikeBotBlock(page.html)) {
+        lastError = "Bot-block / captcha page (low confidence — not marking sold out)";
         continue;
       }
       const products = parseJsonLd(page.html);
@@ -235,14 +251,21 @@ export async function applyScrapedPriceToDeal(dealId: number, scrape: ScrapedPri
     : Number(deal.originalPrice);
   const fields = catalogPriceFields(scrape.salePrice, listed > 0 ? listed : scrape.salePrice);
   const now = new Date();
+  // Ambiguous / bot-block scrapes must not flip a live card to sold_out.
+  const confidentOos = scrape.available === false && !/bot.?block|captcha|low.?confidence|ambiguous/i.test(scrape.notes || "");
+  const nextStock = confidentOos
+    ? "sold_out"
+    : scrape.available === true
+      ? (deal.stockStatus === "sold_out" ? "in_stock" : deal.stockStatus)
+      : deal.stockStatus;
   await db.update(deals).set({
     ...fields,
     originalPrice: (listed > 0 ? listed : Number(deal.originalPrice)).toFixed(2),
     lastScrapedAt: now,
     lastVerifiedAt: now,
-    verificationStatus: scrape.available === false ? "out_of_stock" : "verified_active",
+    verificationStatus: confidentOos ? "out_of_stock" : "verified_active",
     verificationNotes: scrape.notes,
-    stockStatus: scrape.available === false ? "sold_out" : deal.stockStatus,
+    stockStatus: nextStock,
     dealExpiresAt: scrape.endsAt || deal.dealExpiresAt,
     updatedAt: now,
   }).where(eq(deals.id, dealId));

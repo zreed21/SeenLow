@@ -90,6 +90,12 @@ export async function PUT(request: NextRequest) {
     update.isActive = on;
     update.okToSell = on;
     if (on) {
+      // Republish must clear sold_out / stale verification so refreshCatalogPricing
+      // can put the card back into Top-50 (homepage top50=true).
+      update.stockStatus = "in_stock";
+      if (!current.stockQuantity || current.stockQuantity <= 0) update.stockQuantity = 10;
+      update.verificationStatus = "verified_active";
+      update.verificationNotes = "Republished by admin";
       update.ctaType = "affiliate";
       update.affiliateStatus = "approved";
       update.affiliateNetwork = "amazon";

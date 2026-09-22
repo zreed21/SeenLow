@@ -156,7 +156,10 @@ export default function DealInboxPage() {
   return (
     <div style={{ maxWidth: 920, margin: "0 auto", padding: "24px 16px", color: "#F0E6D8", minHeight: "100vh", background: "#0A0A0A" }}>
       <h1 style={{ fontSize: 28, fontWeight: 900 }}>Amazon cards</h1>
-      <p style={{ color: "#A1A1AA", fontSize: 14 }}>Live homepage cards first. Draft URLs below. Timer format 01:22:25.</p>
+      <p style={{ color: "#A1A1AA", fontSize: 14 }}>
+        Live homepage cards first. Draft URLs below. Timer format 01:22:25.{" "}
+        <a href="/admin/deal-review" style={{ color: "#B91C1C", fontWeight: 700 }}>Deal review / scout flow →</a>
+      </p>
       {message ? <p style={{ color: "#FBBF24" }}>{message}</p> : null}
 
       <h2 style={{ marginTop: 28, fontSize: 18, fontWeight: 800 }}>On the site</h2>
