@@ -5,7 +5,7 @@ import { deals } from "@/db/schema";
 import { getSessionUser } from "@/lib/auth";
 import { refreshCatalogPricing } from "@/lib/catalogPricing";
 import { ensureDealInboxTable, firstInboxRow } from "@/lib/dealInboxSchema";
-import { scrapeProductPrice } from "@/lib/priceScrape";
+import { isHighConfidenceUnavailable, scrapeProductPrice } from "@/lib/priceScrape";
 import { runDealMonitor } from "@/lib/dealMonitor";
 import { publishDealFromInbox } from "@/lib/dealInboxPublish";
 
@@ -17,7 +17,7 @@ async function requireAdmin() {
 
 /**
  * Owner actions for /admin/deal-review:
- * - approve: scrape first; only publish+monitor if in stock
+ * - approve: scrape first; only publish+monitor if in stock (forceInStock skips false-OOS 409)
  * - reject | hold: stage off live
  * - remove: unpublish deal, keep inbox for review
  * - requeue: move stopped/rejected back to awaiting_verification
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         listed_price = COALESCE(${scrape.listedPrice}, listed_price),
         ends_at = COALESCE(${scrape.endsAt}, ends_at),
         last_checked_at = now(),
-        check_status = ${scrape.ok ? (scrape.available === false ? "unavailable" : "priced") : "failed"},
+        check_status = ${scrape.ok ? (isHighConfidenceUnavailable(scrape) ? "unavailable" : "priced") : "failed"},
         check_notes = ${scrape.notes},
         updated_at = now()
       WHERE id = ${id}
@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
         salePrice: scrape.salePrice,
         listedPrice: scrape.listedPrice,
         available: scrape.available,
+        availabilityConfidence: scrape.availabilityConfidence,
         notes: scrape.notes,
         title: scrape.title,
       },
@@ -126,8 +127,19 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "approve") {
-    // Always recheck stock before going live.
+    const forceInStock = body.forceInStock === true || body.forceApprove === true;
+    // Always recheck stock/price before going live (force still scrapes for price update).
     const scrape = await scrapeProductPrice(String(row.url));
+    const highConfOos = isHighConfidenceUnavailable(scrape);
+    const overrideNote = forceInStock
+      ? `Owner force-approve override: treated as in stock (scrape available=${String(scrape.available)}, confidence=${scrape.availabilityConfidence}). ${scrape.notes}`
+      : scrape.notes;
+    const checkStatus = forceInStock
+      ? (scrape.ok || scrape.salePrice ? "priced" : scrape.ok === false ? "failed" : "priced")
+      : scrape.ok
+        ? (highConfOos ? "unavailable" : "priced")
+        : "failed";
+
     await db.execute(sql`
       UPDATE deal_inbox SET
         title = COALESCE(${scrape.title}, title),
@@ -135,16 +147,17 @@ export async function POST(request: NextRequest) {
         listed_price = COALESCE(${scrape.listedPrice}, listed_price),
         ends_at = COALESCE(${scrape.endsAt}, ends_at),
         last_checked_at = now(),
-        check_status = ${scrape.ok ? (scrape.available === false ? "unavailable" : "priced") : "failed"},
-        check_notes = ${scrape.notes},
+        check_status = ${checkStatus},
+        check_notes = ${overrideNote},
         updated_at = now()
       WHERE id = ${id}
     `);
 
-    if (scrape.ok && scrape.available === false) {
+    // Only block on high-confidence OOS; forceInStock skips this 409 path.
+    if (highConfOos && !forceInStock) {
       return NextResponse.json({
         success: false,
-        error: "Cannot approve — product appears sold out / unavailable. Fix the link or hold for review.",
+        error: "Cannot approve — product appears sold out / unavailable. Fix the link, hold for review, or use force approve if you confirmed it is in stock.",
         scrape,
       }, { status: 409 });
     }
@@ -167,10 +180,27 @@ export async function POST(request: NextRequest) {
         scrape,
       }, { status: published.status });
     }
+
+    if (forceInStock && published.dealId) {
+      await db.update(deals).set({
+        stockStatus: "in_stock",
+        verificationStatus: "verified_active",
+        verificationNotes: overrideNote,
+        updatedAt: new Date(),
+      }).where(eq(deals.id, published.dealId));
+      await db.execute(sql`
+        UPDATE deal_inbox SET check_notes = ${overrideNote}, check_status = 'priced', updated_at = now()
+        WHERE id = ${id}
+      `);
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Approved & published. Live monitoring will recheck every 30 minutes via POST /api/deal-monitor/run.",
+      message: forceInStock
+        ? "Force-approved & published (owner confirmed in stock). Live monitoring will recheck every 30 minutes via POST /api/deal-monitor/run."
+        : "Approved & published. Live monitoring will recheck every 30 minutes via POST /api/deal-monitor/run.",
       dealId: published.dealId,
+      forceInStock,
       scrape,
       publish: published,
     });

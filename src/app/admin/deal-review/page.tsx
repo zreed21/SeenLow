@@ -161,13 +161,17 @@ export default function DealReviewPage() {
     load();
   };
 
-  const act = async (id: number, action: string) => {
+  const act = async (id: number, action: string, opts?: { forceInStock?: boolean }) => {
     setBusy(true);
     const data = await fetch("/api/deal-inbox/review", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, action }),
+      body: JSON.stringify({
+        id,
+        action,
+        ...(opts?.forceInStock ? { forceInStock: true } : {}),
+      }),
     }).then((r) => r.json());
     setBusy(false);
     setMessage(data.message || data.error || `${action} done`);
@@ -273,6 +277,15 @@ export default function DealReviewPage() {
               <button type="button" onClick={() => act(row.id, "approve")} style={{ ...ghost, color: "#34D399" }} disabled={busy}>
                 Approve &amp; publish
               </button>
+              <button
+                type="button"
+                onClick={() => act(row.id, "approve", { forceInStock: true })}
+                style={{ ...ghost, color: "#FBBF24" }}
+                disabled={busy}
+                title="Bypasses false sold-out scrape blocks when you confirmed the item is in stock on Amazon"
+              >
+                Force approve (I confirmed in stock)
+              </button>
               <button type="button" onClick={() => act(row.id, "hold")} style={{ ...ghost, color: "#A1A1AA" }} disabled={busy}>
                 Hold
               </button>
@@ -293,6 +306,15 @@ export default function DealReviewPage() {
               </button>
               <button type="button" onClick={() => act(row.id, "approve")} style={{ ...ghost, color: "#34D399" }} disabled={busy}>
                 Re-approve &amp; publish
+              </button>
+              <button
+                type="button"
+                onClick={() => act(row.id, "approve", { forceInStock: true })}
+                style={{ ...ghost, color: "#FBBF24" }}
+                disabled={busy}
+                title="Bypasses false sold-out scrape blocks when you confirmed the item is in stock on Amazon"
+              >
+                Force approve (I confirmed in stock)
               </button>
               <button type="button" onClick={() => act(row.id, "remove")} style={{ ...ghost, color: "#F87171" }} disabled={busy}>
                 Keep off site
@@ -351,7 +373,10 @@ export default function DealReviewPage() {
 
       <section style={{ marginTop: 36 }}>
         <h2 style={{ fontSize: 18, fontWeight: 800 }}>Needs your verification ({sections.needs.length})</h2>
-        <p style={{ color: "#A1A1AA", fontSize: 13 }}>Approve only publishes when a price check says the item is in stock.</p>
+        <p style={{ color: "#A1A1AA", fontSize: 13 }}>
+          Approve &amp; publish requires a sale price and blocks only on high-confidence sold-out scrapes.
+          Use <strong style={{ color: "#FBBF24" }}>Force approve</strong> when you confirmed the item is in stock on Amazon — it bypasses false OOS scrape blocks (sale price still required).
+        </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
           {sections.needs.map((r) => renderCard(r, "needs"))}
           {sections.needs.length === 0 ? <p style={{ color: "#737373" }}>Nothing waiting.</p> : null}
@@ -371,6 +396,9 @@ export default function DealReviewPage() {
 
       <section style={{ marginTop: 36, marginBottom: 48 }}>
         <h2 style={{ fontSize: 18, fontWeight: 800 }}>Stopped — needs review ({sections.stopped.length})</h2>
+        <p style={{ color: "#A1A1AA", fontSize: 13 }}>
+          Re-approve uses the same stock checks. Force approve bypasses false OOS scrape blocks if you confirmed in stock.
+        </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
           {sections.stopped.map((r) => renderCard(r, "stopped"))}
           {sections.stopped.length === 0 ? <p style={{ color: "#737373" }}>No stopped deals.</p> : null}
