@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { deals } from "@/db/schema";
 import { getSessionUser } from "@/lib/auth";
@@ -8,6 +8,14 @@ import { refreshCatalogPricing } from "@/lib/catalogPricing";
 import { scanSourcePage, sourceCanPublish, upsertSourceFromScan } from "@/lib/sourceCertification";
 
 const TAG = "seenlow-20";
+
+function firstRow(result: unknown): Record<string, unknown> | null {
+  if (!result) return null;
+  if (Array.isArray(result)) return (result[0] as Record<string, unknown>) || null;
+  const rows = (result as { rows?: unknown[] }).rows;
+  if (Array.isArray(rows)) return (rows[0] as Record<string, unknown>) || null;
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   const user = await getSessionUser();
@@ -19,7 +27,7 @@ export async function POST(request: NextRequest) {
   if (!id) return NextResponse.json({ success: false, error: "id required" }, { status: 400 });
 
   const found = await db.execute(sql`SELECT * FROM deal_inbox WHERE id = ${id} LIMIT 1`);
-  const row = ((found as { rows?: any[] }).rows || found)[0] as any;
+  const row = firstRow(found);
   if (!row) return NextResponse.json({ success: false, error: "Inbox row not found" }, { status: 404 });
 
   const sale = Number(row.sale_price);
@@ -36,11 +44,13 @@ export async function POST(request: NextRequest) {
       u.searchParams.set("tag", TAG);
       url = u.toString();
     }
-  } catch { /* keep url */ }
+  } catch {
+    /* keep url */
+  }
 
   const fields = catalogPriceFields(sale, orig);
   const scan = await scanSourcePage(url);
-  const source = await upsertSourceFromScan(row.domain === "amazon.com" ? "Amazon" : String(row.domain || "Retailer"), scan);
+  const source = await upsertSourceFromScan(String(row.domain || "amazon.com") === "amazon.com" ? "Amazon" : String(row.domain || "Retailer"), scan);
   const canSell = sourceCanPublish(source);
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const amazon = /amazon\.com/i.test(url);
@@ -51,7 +61,7 @@ export async function POST(request: NextRequest) {
     slug: `${slug}-${Date.now().toString().slice(-4)}`,
     description: title,
     category: "General",
-    brand: row.asin || "Amazon",
+    brand: String(row.asin || "Amazon"),
     originalPrice: orig.toFixed(2),
     dealPrice: sale.toFixed(2),
     serviceFee: fields.serviceFee,
@@ -72,7 +82,7 @@ export async function POST(request: NextRequest) {
     trackingUrl: amazon ? url : null,
     affiliateStatus: amazon ? "approved" : "none",
     resellerAllowed: amazon ? false : true,
-    dealExpiresAt: row.ends_at ? new Date(row.ends_at) : null,
+    dealExpiresAt: row.ends_at ? new Date(String(row.ends_at)) : null,
     lastScrapedAt: new Date(),
     lastVerifiedAt: new Date(),
     verificationStatus: "verified_active",
